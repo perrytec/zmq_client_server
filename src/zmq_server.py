@@ -30,10 +30,10 @@ class ZmqServer():
     #     return self.pub_socket.recv_string()
 
     # Push pull
-    async def poll_pull_socket(self):
-        await self.pull_socket.poll()
+    async def poll_pull_socket(self) -> int:
+        return await self.pull_socket.poll()
     
-    async def recv_pull(self):
+    async def recv_pull(self) -> str:
         return await self.pull_socket.recv_string()
     
     async def recv_all_pulls(self) -> list[str]:
@@ -46,14 +46,14 @@ class ZmqServer():
 
     # Request reply
     # Req-Rep pattern is synchronous - client blocks until server replies
-    async def poll_rep_socket(self):
-        await self.rep_socket.poll()
+    async def poll_rep_socket(self) -> int:
+        return await self.rep_socket.poll()
     
     async def reply(self, data):
         await self.rep_socket.send_string(data)
 
-    async def receive_req(self):
-        return self.rep_socket.recv_string()
+    async def receive_req(self) -> str:
+        return await self.rep_socket.recv_string()
 
     def close(self):
         if hasattr(self, 'pub_socket'):
@@ -65,28 +65,49 @@ class ZmqServer():
         self.zmq_context.term()
 
 
-async def main(server):
+async def pubsub_server_task(server):
     try:
         while True:
-            msg = await server.poll_pull_socket()
-            print(f"Received: {msg}")
+            poll_count = await server.poll_pull_socket()
+            if poll_count > 0:
+                msg = await server.recv_pull()
+                print(f"Received: {msg}")
     except asyncio.CancelledError:
         pass
     finally:
-        print("Closing server")
-        server.close()
+        print("Exiting pubsub server task")
+
+
+async def reqrep_server_task(server: ZmqServer):
+    try:
+        while True:
+            poll_count = await server.poll_rep_socket()
+            if poll_count > 0:
+                msg = await server.receive_req()
+                print(f"Received: {msg}")
+                await server.reply("Received")
+    except asyncio.CancelledError:
+        pass
+    finally:
+        print("Exiting reqrep server task")
+
 
 if __name__ == "__main__":
     server = ZmqServer("tcp://127.0.0.1:5555",
                        "tcp://127.0.0.1:5556", "tcp://127.0.0.1:5557")
     loop = asyncio.new_event_loop()
-    main_task = loop.create_task(main(server))
+    pubsub_task = loop.create_task(pubsub_server_task(server))
+    reqrep_task = loop.create_task(reqrep_server_task(server))
 
     try:
         loop.run_forever()
     except KeyboardInterrupt:
-        main_task.cancel()
-        loop.run_until_complete(main_task)
+        pubsub_task.cancel()
+        reqrep_task.cancel()
+        loop.run_until_complete(pubsub_task)
+        loop.run_until_complete(reqrep_task)
+    finally:
+        print("Closing server...")
+        server.close()
 
-    print("I'm complete")
     loop.close()

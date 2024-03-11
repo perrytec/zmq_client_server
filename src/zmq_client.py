@@ -50,13 +50,16 @@ class ZmqClient():
 
 
 if __name__ == "__main__":
-    server = ZmqClient("tcp://127.0.0.1:5555", "tcp://127.0.0.1:5556", "tcp://127.0.0.1:5557")
+    client = ZmqClient("tcp://127.0.0.1:5555",
+                       "tcp://127.0.0.1:5556", "tcp://127.0.0.1:5557")
     end_time = time.time() + 900  # 15 minutes
 
-    server.subscribe("589141846_tob")
+    client.subscribe("589141846_tob")
     while time.time() < end_time:
-        server.push("589141846", "top_of_book")
-        time.sleep(30)
+        # client.push("589141846", "top_of_book")
+        reply = client.request("Attempting request")
+        print("Received reply:", reply)
+        time.sleep(2)
 
-    server.close()
-    server.zmq_context.term()
+    client.close()
+    client.zmq_context.term()
