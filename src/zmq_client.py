@@ -7,19 +7,15 @@ import zmq.asyncio
 class ZmqClient():
     def __init__(self, sub_ip: str = None, push_ip: str = None, req_ip: str = None):
         self.zmq_context = zmq.Context()
-        self.poller = zmq.Poller()
         if sub_ip:
             self.sub_socket = self.zmq_context.socket(zmq.SUB)
             self.sub_socket.connect(sub_ip)
-            # self.poller.register(self.sub_socket, zmq.POLLIN)
         if push_ip:
             self.push_socket = self.zmq_context.socket(zmq.PUSH)
             self.push_socket.connect(push_ip)
-            # self.poller.register(self.push_socket, zmq.POLLOUT)
         if req_ip:
             self.req_socket = self.zmq_context.socket(zmq.REQ)
             self.req_socket.connect(req_ip)
-            # self.poller.register(self.req_socket, zmq.POLLIN)
 
     # Pub sub
     def subscribe(self, topic):
@@ -39,6 +35,7 @@ class ZmqClient():
         self.req_socket.send_string(data)
         return self.req_socket.recv_string()
 
+    # Close
     def close(self):
         if hasattr(self, 'sub_socket'):
             self.sub_socket.close()
@@ -57,7 +54,7 @@ if __name__ == "__main__":
     client.subscribe("589141846_tob")
     while time.time() < end_time:
         # client.push("589141846", "top_of_book")
-        reply = client.request("Attempting request")
+        reply = client.request("589141846")
         print("Received reply:", reply)
         time.sleep(2)
 

@@ -7,19 +7,22 @@ import zmq.asyncio
 class ZmqServer():
     def __init__(self, pub_ip: str = None, pull_ip: str = None, rep_ip: str = None):
         self.zmq_context = zmq.asyncio.Context()
-        self.poller = zmq.asyncio.Poller()
+        self._check_for_duplicates(pub_ip, pull_ip, rep_ip)
+        
         if pub_ip:
             self.pub_socket = self.zmq_context.socket(zmq.PUB)
             self.pub_socket.bind(pub_ip)
-            self.poller.register(self.pub_socket, zmq.POLLOUT)
         if pull_ip:
             self.pull_socket = self.zmq_context.socket(zmq.PULL)
             self.pull_socket.bind(pull_ip)
-            self.poller.register(self.pull_socket, zmq.POLLIN)
         if rep_ip:
             self.rep_socket = self.zmq_context.socket(zmq.REP)
             self.rep_socket.bind(rep_ip)
-            self.poller.register(self.rep_socket, zmq.POLLIN)
+    
+    def _check_for_duplicates(self, pub_ip, pull_ip, rep_ip):
+        ip_set = set(filter(None, [pub_ip, pull_ip, rep_ip]))
+        if len(ip_set) != len([pub_ip, pull_ip, rep_ip]):
+            raise ValueError("Duplicate IP parameters are not allowed.")
 
     # Pub sub
     async def publish(self, topic, data):
