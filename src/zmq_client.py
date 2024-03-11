@@ -1,19 +1,25 @@
-import zmq
+import asyncio
 import time
+import zmq
+import zmq.asyncio
 
 
 class ZmqClient():
     def __init__(self, sub_ip: str = None, push_ip: str = None, req_ip: str = None):
         self.zmq_context = zmq.Context()
+        self.poller = zmq.Poller()
         if sub_ip:
             self.sub_socket = self.zmq_context.socket(zmq.SUB)
             self.sub_socket.connect(sub_ip)
+            # self.poller.register(self.sub_socket, zmq.POLLIN)
         if push_ip:
             self.push_socket = self.zmq_context.socket(zmq.PUSH)
             self.push_socket.connect(push_ip)
+            # self.poller.register(self.push_socket, zmq.POLLOUT)
         if req_ip:
             self.req_socket = self.zmq_context.socket(zmq.REQ)
             self.req_socket.connect(req_ip)
+            # self.poller.register(self.req_socket, zmq.POLLIN)
 
     # Pub sub
     def subscribe(self, topic):

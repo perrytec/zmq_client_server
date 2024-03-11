@@ -1,0 +1,4 @@
+environment.ini
+.idea
+**/__pycache__
+.coverage
