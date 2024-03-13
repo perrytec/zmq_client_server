@@ -40,7 +40,7 @@ class ZmqServer():
         return await self.pull_socket.recv_string()
     
     async def recv_all_pulls(self) -> list[str]:
-        poll_count = await self.pull_socket.poll(1)
+        poll_count = await self.pull_socket.poll()
         print(f"Poll count: {poll_count}")
         msgs = []
         for _ in range(poll_count):
