@@ -48,6 +48,7 @@ class ZmqClient():
         self.zmq_context.term()
 
     # Client Management Methods
+    # Threadsafe - Each can be run on a separate thread
     def read_subscriber(self):
         while True:
             msg = self.receive_sub()
@@ -58,20 +59,30 @@ class ZmqClient():
             self.push(con_id, f"{inst_id} {book_type}")
             time.sleep(timeout)
 
+    def req_tob_snapshot(self, inst_id, con_id):
+        while True:
+            tob = self.request(f"{inst_id} {con_id}")
+            print("Received tob_snapshot:", tob)
+            time.sleep(5)
+
 
 if __name__ == "__main__":
     client = ZmqClient("tcp://127.0.0.1:5555",
                        "tcp://127.0.0.1:5556", "tcp://127.0.0.1:5557")
 
-    client.subscribe("2411")
-    subscriber_read_thread = threading.Thread(
-        target=client.read_subscriber, daemon=True)
-    subscriber_read_thread.start()
+    # client.subscribe("2411")
+    # subscriber_read_thread = threading.Thread(
+    #     target=client.read_subscriber, daemon=True)
+    # subscriber_read_thread.start()
 
-    # Keep alive
-    keep_alive_thread = threading.Thread(target=client.keep_alive_subscriber,
-                                         args=("589141846", "2411", "top_of_book"), daemon=True)
-    keep_alive_thread.start()
+    # # Keep alive
+    # keep_alive_thread = threading.Thread(target=client.keep_alive_subscriber,
+    #                                      args=("589141846", "2411", "top_of_book"), daemon=True)
+    # keep_alive_thread.start()
+
+    tob_snapshot_thread = threading.Thread(target=client.req_tob_snapshot,
+                                           args=("2411", "589141846"), daemon=True)
+    tob_snapshot_thread.start()
 
     time.sleep(1000)
     client.close()

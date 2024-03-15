@@ -52,7 +52,7 @@ class ZmqServer():
     async def poll_rep_socket(self) -> int:
         return await self.rep_socket.poll()
     
-    async def reply(self, data):
+    async def reply(self, data: str):
         await self.rep_socket.send_string(data)
 
     async def receive_req(self) -> str:
