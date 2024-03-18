@@ -1,0 +1,12 @@
+LICENSE
+README.md
+pyproject.toml
+setup.cfg
+src/zmq_python/__init__.py
+src/zmq_python/zmq_client.py
+src/zmq_python/zmq_server.py
+src/zmq_python.egg-info/PKG-INFO
+src/zmq_python.egg-info/SOURCES.txt
+src/zmq_python.egg-info/dependency_links.txt
+src/zmq_python.egg-info/requires.txt
+src/zmq_python.egg-info/top_level.txt

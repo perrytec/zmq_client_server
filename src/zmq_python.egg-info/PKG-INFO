@@ -1,6 +1,20 @@
-# zmq_client_server
+Metadata-Version: 2.1
+Name: zmq_python
+Version: 0.0.1
+Summary: Python ZMQ Wrapper
+Home-page: private
+Author: perry
+Author-email: noemail@example.com
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: zmq
+
+# zmq_python
 A simple Server and Client wrapper for ZMQ Python.
-Builds on top of `zmq`, `zmq.asyncio` to support an asynchronous server, and a synchronous client.
+Builds on top of `zmq`, `zmq.asyncio` to support an asynchronous server, and a sychrronous client.
 
 Both Server and Client supports the Request-Reply, Push-Pull, and Publish-Subscribe message patterns.
 
